@@ -12,6 +12,7 @@ const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -19,6 +20,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
 const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_URL}/api/auth/jwks`));
 
 const verifyToken = async (req, res, next) => {
@@ -30,12 +32,18 @@ const verifyToken = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-
+ 
   try {
-    const { payload } = await jwtVerify(token, JWKS);
+    const { payload } = await jwtVerify(token, JWKS,{
+      algorithms: ["EdDSA"],                    // Tell it to expect EdDSA asymmetric keys
+      issuer: process.env.CLIENT_URL,          // Matches the token's "iss" (e.g., http://localhost:3000)
+      audience: process.env.CLIENT_URL,
+      clockTolerance: "5 minutes"
+    });
     console.log(payload);
     next();
   } catch (error) {
+    console.log(error.message);
     return res.status(403).json({ message: "Forbidden" });
   }
 };
@@ -54,7 +62,7 @@ async function run() {
     app.get("/doctors/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
 
-      const result = await doctor.findOne({
+      const result = await doctorCollection.findOne({
         _id: new ObjectId(id),
       });
 
