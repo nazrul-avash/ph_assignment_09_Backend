@@ -44,13 +44,22 @@ async function run() {
   
 
     const db = client.db("DocApp");
-    const destinationCollection = db.collection("doctors");
+    const doctorCollection = db.collection("doctors");
     const bookingCollection = db.collection("bookings");
 
     app.get("/doctors", async (req, res) => {
-      const result = await destinationCollection.find().limit(3).toArray()
+      const result = await doctorCollection.find().limit(3).toArray()
       res.json(result)
     })
+    app.get("/doctors/:id", verifyToken, async (req, res) => {
+      const { id } = req.params;
+
+      const result = await doctor.findOne({
+        _id: new ObjectId(id),
+      });
+
+      res.json(result);
+    });
 
     app.get("/destination", async (req, res) => {
       const result = await destinationCollection.find().toArray();
@@ -65,15 +74,7 @@ async function run() {
       res.json(result);
     });
 
-    app.get("/destination/:id", verifyToken, async (req, res) => {
-      const { id } = req.params;
-
-      const result = await destinationCollection.findOne({
-        _id: new ObjectId(id),
-      });
-
-      res.json(result);
-    });
+    
 
     app.patch("/destination/:id", async (req, res) => {
       const { id } = req.params;
