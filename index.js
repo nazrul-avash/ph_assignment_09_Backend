@@ -152,20 +152,37 @@ app.get("/appointments", async (req, res) => {
       const { email } = req.params;
       const updatedData = req.body;
       
-
+      console.log(updatedData);
       const result = await userCollection.updateOne(
         { email: email },
         { $set: updatedData },
       );
-
+      console.log(result);
       res.json(result);
     
     });
 
-    app.get("/destination", async (req, res) => {
-      const result = await destinationCollection.find().toArray();
-      res.json(result);
+  app.get("/profile/:email", async (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email);
+
+    const user = await userCollection.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("GET /profile error:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch user",
     });
+  }
+});
 
 
     
