@@ -60,7 +60,7 @@ async function run() {
    const userCollection = db.collection("user");
 
     app.get("/doctors", async (req, res) => {
-      const result = await doctorCollection.find().limit(3).toArray()
+      const result = await doctorCollection.find().toArray()
       res.json(result)   
     })
     app.get("/doctors/:id", verifyToken, async (req, res) => {
