@@ -185,13 +185,6 @@ app.get("/appointments", async (req, res) => {
 });
 
 
-    
-
-    
-
-
-   
-
     app.post("/booking", verifyToken, async (req, res) => {
       const bookingData = req.body;
       const result = await bookingCollection.insertOne(bookingData);
